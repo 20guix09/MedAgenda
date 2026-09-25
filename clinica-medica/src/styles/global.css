@@ -1,0 +1,236 @@
+@import url("https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;450;500;550;600;650&display=swap");
+
+:root {
+  --background: #e6eef4;
+  --surface: #f2f7fb;
+  --surface-strong: #ffffff;
+  --surface-muted: #d9e5ee;
+  --primary: #0077b6;
+  --primary-dark: #005f92;
+  --primary-soft: #d7eefb;
+  --secondary: #00a86b;
+  --secondary-dark: #008456;
+  --secondary-soft: #d8f5ea;
+  --text: #1e293b;
+  --text-secondary: #64748b;
+  --text-inverse: #ffffff;
+  --error: #e63946;
+  --warning: #f4a261;
+  --success: #00a86b;
+  --info: #0077b6;
+  --border: rgba(30, 41, 59, 0.1);
+  --shadow-soft: 10px 10px 24px rgba(148, 163, 184, 0.42), -10px -10px 24px rgba(255, 255, 255, 0.86);
+  --shadow-soft-sm: 6px 6px 14px rgba(148, 163, 184, 0.28), -6px -6px 14px rgba(255, 255, 255, 0.82);
+  --shadow-pressed: inset 6px 6px 14px rgba(148, 163, 184, 0.3), inset -6px -6px 14px rgba(255, 255, 255, 0.82);
+  --shadow-primary: 0 18px 40px rgba(0, 119, 182, 0.25);
+  --radius-xs: 8px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --font-sans: "Source Sans 3", "Segoe UI Variable", "Segoe UI", Roboto, Arial, sans-serif;
+  --font-display: "Source Sans 3", "Segoe UI Variable Display", "Segoe UI", Roboto, Arial, sans-serif;
+  --transition-fast: 160ms ease;
+  --transition-base: 240ms ease;
+  --transition-slow: 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  background: var(--background);
+  color: var(--text);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(0, 168, 107, 0.09), transparent 32%),
+    radial-gradient(circle at 86% 12%, rgba(0, 119, 182, 0.13), transparent 34%),
+    linear-gradient(135deg, #e6eef4 0%, #eef6fa 52%, #e3edf5 100%);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+::selection {
+  background: rgba(0, 119, 182, 0.22);
+}
+
+:focus-visible {
+  outline: 3px solid rgba(0, 119, 182, 0.38);
+  outline-offset: 3px;
+}
+
+.soft-surface {
+  border: 1px solid rgba(255, 255, 255, 0.62);
+  background: rgba(242, 247, 251, 0.86);
+  box-shadow: var(--shadow-soft);
+}
+
+.soft-surface-inset {
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: rgba(230, 238, 244, 0.76);
+  box-shadow: var(--shadow-pressed);
+}
+
+.auth-background {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.auth-background::before,
+.auth-background::after {
+  position: absolute;
+  z-index: -1;
+  content: "";
+  border-radius: 999px;
+  filter: blur(2px);
+  opacity: 0.75;
+  animation: medical-drift 16s ease-in-out infinite alternate;
+}
+
+.auth-background::before {
+  width: 42rem;
+  height: 42rem;
+  top: -18rem;
+  right: -12rem;
+  background: radial-gradient(circle, rgba(0, 119, 182, 0.22), transparent 65%);
+}
+
+.auth-background::after {
+  width: 32rem;
+  height: 32rem;
+  bottom: -12rem;
+  left: -9rem;
+  background: radial-gradient(circle, rgba(0, 168, 107, 0.2), transparent 68%);
+  animation-delay: -6s;
+}
+
+.medical-grid {
+  background-image:
+    linear-gradient(rgba(0, 119, 182, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 119, 182, 0.08) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent 76%);
+}
+
+.animate-fade-up {
+  animation: fade-up 520ms var(--transition-slow) both;
+}
+
+.animate-panel-slide {
+  transition:
+    transform var(--transition-slow),
+    border-radius var(--transition-slow),
+    box-shadow var(--transition-slow);
+}
+
+.interactive-press {
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.interactive-press:hover {
+  transform: translateY(-1px);
+}
+
+.interactive-press:active {
+  transform: translateY(1px);
+  box-shadow: var(--shadow-pressed);
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes medical-drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  to {
+    transform: translate3d(-26px, 18px, 0) scale(1.06);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 168, 107, 0.28);
+  }
+
+  72% {
+    box-shadow: 0 0 0 18px rgba(0, 168, 107, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 168, 107, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* Nenhuma tela deve criar rolagem horizontal no viewport. */
+html, body, #root { width: 100%; max-width: 100%; overflow-x: hidden; }
