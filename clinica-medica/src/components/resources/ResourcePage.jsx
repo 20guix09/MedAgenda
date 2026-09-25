@@ -14,6 +14,56 @@ const pacienteAliases = {
   numero: ['numero', 'num'], complemento: ['complemento', 'comp'], cidade: ['cidade', 'cid'], estado: ['estado', 'est'],
 };
 
+// Máscaras aplicadas durante a digitação. O valor continua sendo enviado como
+// texto para a API, que já valida CPF e CRM no servidor.
+function onlyDigits(value, limit) {
+  return String(value ?? '').replace(/\D/g, '').slice(0, limit);
+}
+
+function formatCpf(value) {
+  const digits = onlyDigits(value, 11);
+  return digits
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+}
+
+function formatPhone(value) {
+  const digits = onlyDigits(value, 11);
+  if (digits.length <= 2) return digits ? `(${digits}` : '';
+
+  const areaCode = digits.slice(0, 2);
+  const number = digits.slice(2);
+  if (number.length <= 4) return `(${areaCode}) ${number}`;
+  if (number.length <= 8) return `(${areaCode}) ${number.slice(0, 4)}-${number.slice(4)}`;
+  return `(${areaCode}) ${number.slice(0, 5)}-${number.slice(5)}`;
+}
+
+function formatCep(value) {
+  const digits = onlyDigits(value, 8);
+  return digits.replace(/(\d{5})(\d)/, '$1-$2');
+}
+
+function formatMaskedField(key, value) {
+  if (key === 'cpf') return formatCpf(value);
+  if (key === 'telefone') return formatPhone(value);
+  if (key === 'cep') return formatCep(value);
+  if (key === 'crm') return onlyDigits(value, 8);
+  if (key === 'estado_crm' || key === 'estado') {
+    return String(value ?? '').replace(/[^a-z]/gi, '').slice(0, 2).toUpperCase();
+  }
+  return value;
+}
+
+function maskInputProps(key) {
+  if (key === 'cpf') return { inputMode: 'numeric', maxLength: 14, autoComplete: 'off' };
+  if (key === 'telefone') return { inputMode: 'tel', maxLength: 15, autoComplete: 'tel' };
+  if (key === 'cep') return { inputMode: 'numeric', maxLength: 9, autoComplete: 'postal-code' };
+  if (key === 'crm') return { inputMode: 'numeric', maxLength: 8, autoComplete: 'off' };
+  if (key === 'estado_crm' || key === 'estado') return { maxLength: 2, autoComplete: 'address-level1' };
+  return {};
+}
+
 // obtém data e horário locais para impedir agendamentos no passado
 function getLocalNow() {
   const now = new Date();
@@ -244,7 +294,7 @@ export function ResourceModal({ config, item = {}, mode, onClose, onSave }) {
     Object.fromEntries(
       config.fields
         .filter(([, , type]) => !['select', 'patient', 'doctor', 'specialty', 'specialties'].includes(type))
-        .map(([key]) => [key, getResourceFieldValue(config.resource, key, item)]),
+        .map(([key]) => [key, formatMaskedField(key, getResourceFieldValue(config.resource, key, item))]),
     ),
   );
 
@@ -541,6 +591,7 @@ export function ResourceModal({ config, item = {}, mode, onClose, onSave }) {
                         name={key}
                         type={type}
                         value={formValues[key] ?? ''}
+                        {...maskInputProps(key)}
                         min={
                           config.resource === 'consultas' && mode === 'create' && key === 'data'
                             ? getLocalNow().date
@@ -552,7 +603,7 @@ export function ResourceModal({ config, item = {}, mode, onClose, onSave }) {
                         required={config.resource === 'pacientes' && ['numero', 'complemento'].includes(key)}
                         placeholder={config.placeholders?.[key] ?? fieldPlaceholders[key]}
                         onChange={async (event) => {
-                          const value = event.target.value;
+                          const value = formatMaskedField(key, event.target.value);
                           setFormValues((current) => ({ ...current, [key]: value }));
 
                           if (config.resource === 'pacientes' && key === 'cep') {
