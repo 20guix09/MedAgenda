@@ -30,10 +30,16 @@ const cookieOptions = {
   maxAge: 3600000,
 }
 function setSession(res, token) { res.cookie('medagenda_session', token, cookieOptions) }
-function currentUser(req) {
+function tokenFromRequest(req) {
+  const authorization = req.get('authorization') || ''
+  if (authorization.startsWith('Bearer ')) return authorization.slice(7).trim()
   const cookie = (req.headers.cookie || '').split('; ').find(v => v.startsWith('medagenda_session='))
-  if (!cookie) return null
-  try { return jwt.verify(cookie.slice('medagenda_session='.length), process.env.JWT_SECRET) } catch { return null }
+  return cookie?.slice('medagenda_session='.length) || null
+}
+function currentUser(req) {
+  const token = tokenFromRequest(req)
+  if (!token) return null
+  try { return jwt.verify(token, process.env.JWT_SECRET) } catch { return null }
 }
 
 router.get('/me', (req,res) => {
@@ -190,6 +196,7 @@ router.post('/login', async (req, res, next) => {
     setSession(res, token)
     res.json({
       mensagem: 'Login realizado com sucesso',
+      token,
       usuario: {
         id: usuario.id,
         nome: usuario.nome,
@@ -270,6 +277,7 @@ router.post('/google', async (req, res, next) => {
     res.json({
       mensagem: novoUsuario ? 'Conta criada com Google' : 'Login com Google realizado com sucesso',
       novoUsuario,
+      token,
       usuario: {
         id: usuario.id,
         nome: usuario.nome,

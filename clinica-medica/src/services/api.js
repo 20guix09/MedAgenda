@@ -2,6 +2,19 @@
 
 
 const DEFAULT_TIMEOUT = 12000;
+const SESSION_TOKEN_KEY = 'medagenda_session_token';
+
+export function getSessionToken() {
+  try { return localStorage.getItem(SESSION_TOKEN_KEY); } catch { return null; }
+}
+
+export function setSessionToken(token) {
+  try { localStorage.setItem(SESSION_TOKEN_KEY, token); } catch { /* armazenamento indisponível */ }
+}
+
+export function clearSessionToken() {
+  try { localStorage.removeItem(SESSION_TOKEN_KEY); } catch { /* armazenamento indisponível */ }
+}
 
 export const API_CONFIG = {
   baseUrl: (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, ''),
@@ -39,6 +52,7 @@ export async function apiRequest(endpoint, options = {}) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
   const requestSignal = signal ?? controller.signal;
+  const sessionToken = getSessionToken();
 
   try {
     const response = await fetch(`${API_CONFIG.baseUrl}${endpoint}`, {
@@ -48,6 +62,7 @@ export async function apiRequest(endpoint, options = {}) {
       headers: {
         Accept: 'application/json',
         ...(body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
+        ...(sessionToken && !headers.Authorization ? { Authorization: `Bearer ${sessionToken}` } : {}),
         ...headers,
       },
       body: body instanceof FormData || body === undefined ? body : JSON.stringify(body),

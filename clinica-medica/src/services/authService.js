@@ -1,4 +1,4 @@
-import { apiRequest, shouldUseMocks } from './api.js';
+import { apiRequest, clearSessionToken, setSessionToken, shouldUseMocks } from './api.js';
 import { ENDPOINTS } from './endpoints.js';
 import { mockAuthService } from '../mocks/mockAuthService.js';
 
@@ -10,10 +10,12 @@ export const authService = {
       return { user: mockSession.user };
     }
     const data = await apiRequest(ENDPOINTS.auth.login, { method: 'POST', body: credentials, auth: false });
+    if (data.token) setSessionToken(data.token);
     return { user: data.usuario };
   },
   async loginGoogle(credential) {
     const data = await apiRequest(ENDPOINTS.auth.google, { method: 'POST', body: { credential }, auth: false });
+    if (data.token) setSessionToken(data.token);
     return { user: data.usuario, novoUsuario: Boolean(data.novoUsuario) };
   },
   cadastro(payload) {
@@ -23,10 +25,12 @@ export const authService = {
   },
   async logout() {
     if (shouldUseMocks()) { mockSession = null; return; }
-    await apiRequest('/auth/logout', { method: 'POST' });
+    try { await apiRequest('/auth/logout', { method: 'POST' }); }
+    finally { clearSessionToken(); }
   },
   async getCurrentUser() {
     if (shouldUseMocks()) return mockSession?.user ?? null;
-    try { return (await apiRequest('/auth/me')).usuario; } catch { return null; }
+    try { return (await apiRequest('/auth/me')).usuario; }
+    catch { clearSessionToken(); return null; }
   },
 };
